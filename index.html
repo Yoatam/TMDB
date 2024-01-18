@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TMDB</title>
+  <link rel="icon" href="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_1-5bdc75aaebeb75dc7ae79426ddd9be3b2be1e342510f8202baf6bffa71d7f5c4.svg">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+  integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+</head>
+
+<body>
+  <nav class="navbar navbar-light" style="background-color: #032541;">
+    <div class="container pb-1">
+      <a class="navbar-brand" href="#">
+        <img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" alt="" style="height: 30px; width:150px;">
+      </a>
+    </div>
+  </nav>
+  <div class="container">
+
+    <div id="movie-container" class="d-flex flex-wrap justify-content-around mt-5"></div>
+
+    <!-- Movie Details Modal -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="detailsModalLabel">Movie Details</h5>
+            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+            </button>
+          </div>
+          <div class="modal-body" id="modalBody"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const apiKey = '3d1cb94d909aab088231f5af899dffdc';
+    const movieContainer = document.getElementById('movie-container');
+    const modalBody = document.getElementById('modalBody');
+
+   function fetchMovies() {
+  fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${apiKey}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.results) {
+        data.results.forEach(movie => movieContainer.appendChild(createMovieCard(movie)));
+      }
+    })
+    .catch(error => console.error('Error fetching movies:', error));
+}
+
+
+    function createMovieCard(movie) {
+      const cardCol = document.createElement('div');
+      cardCol.className = 'col-md-2 mb-4 mx-5';
+
+      const card = document.createElement('div');
+      card.className = 'movie-card card';
+
+      const img = createImage(movie);
+      img.addEventListener('click', () => showMovieDetailsModal(movie));
+
+      const cardBody = document.createElement('div');
+      cardBody.className = 'card-body';
+
+      const title = createTextElement('h5', 'card-title', movie.title);
+      const releaseDate = createTextElement('p', 'card-text', `Release Date: ${movie.release_date}`);
+
+      cardBody.appendChild(title);
+      cardBody.appendChild(releaseDate);
+
+      card.appendChild(img);
+      card.appendChild(cardBody);
+      cardCol.appendChild(card);
+
+      return cardCol;
+    }
+
+    function createImage(movie) {
+      const img = document.createElement('img');
+      img.src = movie.poster_path ? `https://image.tmdb.org/t/p/w200/${movie.poster_path}` : 'https://via.placeholder.com/200';
+      img.alt = `${movie.title} Poster`;
+      img.className = 'card-img-top';
+      img.setAttribute('data-toggle', 'modal');
+      img.setAttribute('data-placement', 'top');
+      img.setAttribute('data-content', movie.overview);
+      return img;
+    }
+
+    function createTextElement(tag, className, text) {
+      const element = document.createElement(tag);
+      element.className = className;
+      element.textContent = text;
+      return element;
+    }
+
+    function showMovieDetailsModal(movie) {
+      // Clear existing content
+      while (modalBody.firstChild) {
+        modalBody.removeChild(modalBody.firstChild);
+      }
+
+      // Create new content
+      modalBody.appendChild(createTextElement('h2', 'h4', movie.title));
+      modalBody.appendChild(createTextElement('p','p' , `Overview: ${movie.overview}`));
+      modalBody.appendChild(createTextElement('p', 'p', `Release Date: ${movie.release_date}`));
+      modalBody.appendChild(createTextElement('p', 'p', `Vote Average: ${movie.vote_average}`));
+      modalBody.appendChild(createTextElement('p','p', `Popularity: ${movie.popularity}`));
+
+      // Show the modal
+      $('#detailsModal').modal('show');
+    }
+
+    fetchMovies();
+  </script>
+</body>
+ 
+
+</html>
